@@ -3,8 +3,6 @@ from langchain_core.tools import tool
 import codecs
 
 
-
-
 def lightning_tools(client: LightningClient):
     @tool
     def pay_invoice(payment_request: str):
@@ -23,5 +21,15 @@ def lightning_tools(client: LightningClient):
         r_hash = codecs.decode(r_hash_str, 'hex')
         return client.check_invoice_is_settled(r_hash)
 
-    tools = [pay_invoice, create_invoice, check_invoice_is_settled]
+    @tool
+    def get_pubkey():
+        """Get my own public key."""
+        return client.get_pubkey()
+
+    @tool
+    def check_wallet_balance():
+        """Check my wallet balance."""
+        return client.get_wallet_balance()
+
+    tools = [pay_invoice, create_invoice, check_invoice_is_settled, get_pubkey, check_wallet_balance]
     return tools

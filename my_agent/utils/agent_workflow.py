@@ -3,6 +3,7 @@ from my_agent.utils.nodes import call_model, should_continue, get_tool_node
 from my_agent.utils.state import AgentState
 from langgraph.graph import StateGraph, MessagesState, START, END
 from lightning_client import LightningClient
+from langgraph.pregel import RetryPolicy
 
 
 # Define the config
@@ -19,7 +20,7 @@ def create_workflow(name: str, lightning_client: LightningClient):
 
     # Define the two nodes we will cycle between
     workflow.add_node(f"agent-{name}", call_model(lightning_client))
-    workflow.add_node(f"action-{name}", tool_node)
+    workflow.add_node(f"action-{name}", tool_node, retry=RetryPolicy(max_attempts=3))
 
     # Set the entrypoint as `agent`
     # This means that this node is the first one called
