@@ -1,6 +1,8 @@
-from lightning_client.client import LightningClient
+from lightning_client import LightningClient
 from langchain_core.tools import tool
 import codecs
+
+
 
 
 def lightning_tools(client: LightningClient):

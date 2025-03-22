@@ -2,7 +2,8 @@ from functools import lru_cache
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 from my_agent.utils.tools import lightning_tools
-from lightning_client.client import LightningClient
+from lightning_client import LightningClient
+from langgraph.prebuilt import ToolNode
 
 
 @lru_cache(maxsize=4)
@@ -47,4 +48,6 @@ def call_model(lightning_client: LightningClient):
 
 
 def get_tool_node(lightning_client: LightningClient):
-    return lightning_tools(lightning_client)
+    return ToolNode(lightning_tools(lightning_client))
+
+
