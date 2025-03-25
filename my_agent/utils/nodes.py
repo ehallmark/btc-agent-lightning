@@ -11,7 +11,7 @@ def _get_model(model_name: str, lightning_client: LightningClient):
     if model_name == "openai":
         model = ChatOpenAI(temperature=0, model_name="gpt-4o")
     elif model_name == "anthropic":
-        model = ChatAnthropic(temperature=0, model_name="claude-3-haiku-20240307")
+        model = ChatAnthropic(temperature=0, model_name="claude-3-7-sonnet-latest")
     else:
         raise ValueError(f"Unsupported model type: {model_name}")
 
@@ -47,7 +47,10 @@ def call_model(lightning_client: LightningClient):
     return inner_model
 
 
-def get_tool_node(lightning_client: LightningClient):
-    return ToolNode(lightning_tools(lightning_client))
+def get_tool_node(lightning_client: LightningClient, *extra_nodes):
+    tools = lightning_tools(lightning_client)
+    if extra_nodes:
+        tools.extend(extra_nodes)
+    return ToolNode(tools)
 
 

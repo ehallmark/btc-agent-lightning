@@ -11,20 +11,33 @@ class GraphConfig(TypedDict):
     model_name: Literal["anthropic", "openai"]
 
 
-def create_workflow(name: str, lightning_client: LightningClient):
+def create_workflow(name: str, lightning_client: LightningClient, *extra_tools):
     # Define a new graph
     workflow = StateGraph(AgentState, config_schema=GraphConfig)
+
+    # Public key node
+    def pubkey_node(state: AgentState):
+        return {"pubkey": lightning_client.get_pubkey()}
+
+    # Wallet balance node
+    def wallet_balance_node(state: AgentState):
+        return {"wallet_balance": lightning_client.get_wallet_balance()}
 
     # Define the tool node
     tool_node = get_tool_node(lightning_client)
 
     # Define the two nodes we will cycle between
+    workflow.add_node(f"pubkey-{name}", pubkey_node, retry=RetryPolicy(max_attempts=3))
+    workflow.add_node(f"balance-{name}", wallet_balance_node, retry=RetryPolicy(max_attempts=3))
     workflow.add_node(f"agent-{name}", call_model(lightning_client))
     workflow.add_node(f"action-{name}", tool_node, retry=RetryPolicy(max_attempts=3))
 
     # Set the entrypoint as `agent`
     # This means that this node is the first one called
-    workflow.set_entry_point(f"agent-{name}")
+    workflow.set_entry_point(f"pubkey-{name}")
+
+    workflow.add_edge(f"pubkey-{name}", f"balance-{name}")
+    workflow.add_edge(f"balance-{name}", f"agent-{name}")
 
     # We now add a conditional edge
     workflow.add_conditional_edges(
@@ -49,6 +62,5 @@ def create_workflow(name: str, lightning_client: LightningClient):
 
     # We now add a normal edge from `tools` to `agent`.
     # This means that after `tools` is called, `agent` node is called next.
-    workflow.add_edge(f"action-{name}", f"agent-{name}")
-
+    workflow.add_edge(f"action-{name}", f"balance-{name}")
     return workflow
