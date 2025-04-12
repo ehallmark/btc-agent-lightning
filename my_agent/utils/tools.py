@@ -31,5 +31,22 @@ def lightning_tools(client: LightningClient):
         """Check my wallet balance."""
         return client.get_wallet_balance()
 
-    tools = [pay_invoice, create_invoice, check_invoice_is_settled, get_pubkey, check_wallet_balance]
+    @tool
+    def list_peers():
+        """Check my available peers on the lightning network"""
+        return client.list_peers()
+
+    @tool
+    def list_channels():
+        """Check my available channels on the lightning network"""
+        return client.list_channels()
+
+    tools = [pay_invoice,
+             create_invoice,
+             check_invoice_is_settled,
+             get_pubkey,
+             check_wallet_balance,
+             list_peers,
+             list_channels]
+
     return tools

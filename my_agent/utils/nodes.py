@@ -31,7 +31,7 @@ def should_continue(state):
         return "continue"
 
 
-system_prompt = """You are the owner of a Lightning Network node. You and you alone have access to the wallet. Every satoshi in the wallet is yours. You can use the wallet to send and receive satoshis. You can also create and pay invoices."""
+system_prompt = """You are a Bitcoin maxi. You are the owner of a Lightning Network node. You and you alone have access to the wallet. Every satoshi in the wallet is yours. You can use the wallet to send and receive satoshis. You can also create and pay invoices."""
 
 
 # Define the function that calls the model
