@@ -2,7 +2,7 @@ from typing import Literal, TypedDict
 from my_agent.utils.nodes import call_model, should_continue, get_tool_node
 from my_agent.utils.state import AgentState
 from langgraph.graph import StateGraph, MessagesState, START, END
-from lightning_client import LightningClient
+from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.pregel import RetryPolicy
 
 
@@ -11,7 +11,7 @@ class GraphConfig(TypedDict):
     model_name: Literal["anthropic", "openai"]
 
 
-def create_workflow(name: str, lightning_client: LightningClient, *extra_tools):
+def create_workflow(name: str, lightning_client: MultiServerMCPClient):
     # Define a new graph
     workflow = StateGraph(AgentState, config_schema=GraphConfig)
 

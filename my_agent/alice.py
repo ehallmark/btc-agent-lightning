@@ -1,30 +1,37 @@
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
-import getpass
 import os
-from lightning_client import LightningClient
+from langchain_mcp_adapters.client import MultiServerMCPClient
 from my_agent.utils.agent_workflow import create_workflow
-
 
 load_dotenv()  # take environment variables from .env.
 
 
-def _set_env(var: str):
+user = 'alice'
+
+
+def _ensure_env(var: str):
     if not os.environ.get(var):
-        os.environ[var] = getpass.getpass(f"{var}: ")
+        raise RuntimeError(f"{var} is not set. Please set it in your environment or .env file.")
 
 
-_set_env("ANTHROPIC_API_KEY")
+_ensure_env("ANTHROPIC_API_KEY")
 
 
-alice = LightningClient(
-    rpc_port=10001,
-    cert_path=os.path.expanduser('~/Library/Application Support/Lnd/tls.cert'),
-    macaroon_path=os.path.expanduser('~/repos/lightning-ai/dev/alice/data/chain/bitcoin/simnet/admin.macaroon')
-)
-
-workflow = create_workflow("alice", alice)
-
-# Finally, we compile it!
-# This compiles it into a LangChain Runnable,
-# meaning you can use it as you would any other runnable
-graph = workflow.compile()
+@asynccontextmanager
+async def make_graph():
+    async with MultiServerMCPClient(
+        {
+            'lightning': {
+                'command': os.environ['MCP_TOOL_PYTHON_EXECUTABLE'],
+                'args': [os.environ['MCP_TOOL_PYTHON_SERVER'],
+                         os.environ[f'{user.upper()}_LIGHTNING_RPC_PORT'],
+                         os.environ[f'{user.upper()}_LIGHTNING_CERT_PATH'],
+                         os.environ[f'{user.upper()}_LIGHTNING_MACAROON_PATH']],
+                'transport': 'stdio',
+            }
+        }
+    ) as lightning_mcp:
+        workflow = create_workflow(user, lightning_mcp)
+        graph = workflow.compile()
+        yield graph

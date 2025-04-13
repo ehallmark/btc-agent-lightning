@@ -7,7 +7,7 @@ from my_agent.utils.agent_workflow import create_workflow
 load_dotenv()  # take environment variables from .env.
 
 
-user = 'charlie'
+user = 'bob'
 
 
 def _ensure_env(var: str):

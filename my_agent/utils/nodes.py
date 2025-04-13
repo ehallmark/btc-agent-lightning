@@ -1,13 +1,12 @@
 from functools import lru_cache
 from langchain_anthropic import ChatAnthropic
+from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_openai import ChatOpenAI
-from my_agent.utils.tools import lightning_tools
-from lightning_client import LightningClient
 from langgraph.prebuilt import ToolNode
 
 
 @lru_cache(maxsize=4)
-def _get_model(model_name: str, lightning_client: LightningClient):
+def _get_model(model_name: str, lightning_client: MultiServerMCPClient):
     if model_name == "openai":
         model = ChatOpenAI(temperature=0, model_name="gpt-4o")
     elif model_name == "anthropic":
@@ -15,7 +14,7 @@ def _get_model(model_name: str, lightning_client: LightningClient):
     else:
         raise ValueError(f"Unsupported model type: {model_name}")
 
-    model = model.bind_tools(lightning_tools(lightning_client))
+    model = model.bind_tools(lightning_client.get_tools())
     return model
 
 
@@ -35,7 +34,7 @@ system_prompt = """You are a Bitcoin maxi. You are the owner of a Lightning Netw
 
 
 # Define the function that calls the model
-def call_model(lightning_client: LightningClient):
+def call_model(lightning_client: MultiServerMCPClient):
     def inner_model(state, config):
         messages = state["messages"]
         messages = [{"role": "system", "content": system_prompt}] + messages
@@ -47,10 +46,8 @@ def call_model(lightning_client: LightningClient):
     return inner_model
 
 
-def get_tool_node(lightning_client: LightningClient, *extra_nodes):
-    tools = lightning_tools(lightning_client)
-    if extra_nodes:
-        tools.extend(extra_nodes)
+def get_tool_node(lightning_client: MultiServerMCPClient):
+    tools = lightning_client.get_tools()
     return ToolNode(tools)
 
 
