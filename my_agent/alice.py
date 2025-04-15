@@ -23,12 +23,8 @@ async def make_graph():
     async with MultiServerMCPClient(
         {
             'lightning': {
-                'command': os.environ['MCP_TOOL_PYTHON_EXECUTABLE'],
-                'args': [os.environ['MCP_TOOL_PYTHON_SERVER'],
-                         os.environ[f'{user.upper()}_LIGHTNING_RPC_PORT'],
-                         os.environ[f'{user.upper()}_LIGHTNING_CERT_PATH'],
-                         os.environ[f'{user.upper()}_LIGHTNING_MACAROON_PATH']],
-                'transport': 'stdio',
+                'url': os.environ['ALICE_MCP_URL'],
+                'transport': 'sse',
             }
         }
     ) as lightning_mcp:
