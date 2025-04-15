@@ -1,6 +1,6 @@
 from typing import Literal, TypedDict
-from my_agent.utils.nodes import call_model, should_continue, get_tool_node
-from my_agent.utils.state import AgentState
+from lightning_agent.utils.nodes import call_model, should_continue, get_tool_node
+from lightning_agent.utils.state import AgentState
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.pregel import RetryPolicy

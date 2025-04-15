@@ -2,12 +2,12 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 import os
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from my_agent.utils.agent_workflow import create_workflow
+from lightning_agent.utils.agent_workflow import create_workflow
 
 load_dotenv()  # take environment variables from .env.
 
 
-user = 'alice'
+user = 'charlie'
 
 
 def _ensure_env(var: str):
@@ -23,7 +23,7 @@ async def make_graph():
     async with MultiServerMCPClient(
         {
             'lightning': {
-                'url': os.environ['ALICE_MCP_URL'],
+                'url': os.environ['CHARLIE_MCP_URL'],
                 'transport': 'sse',
             }
         }
