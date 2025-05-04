@@ -1,7 +1,7 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "charlie": "./charlie.py:make_graph"
+    "coordinator": "./src/coordinator/agent.py:graph"
   },
   "env": ".env"
 }

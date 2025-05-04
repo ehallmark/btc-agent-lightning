@@ -1,7 +1,10 @@
+import sqlite3
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 import os
 from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.checkpoint.sqlite import SqliteSaver
+
 from lightning_agent.utils.agent_workflow import create_workflow
 
 load_dotenv()  # take environment variables from .env.
@@ -29,5 +32,7 @@ async def make_graph():
         }
     ) as lightning_mcp:
         workflow = create_workflow(user, lightning_mcp)
-        graph = workflow.compile()
+        conn = sqlite3.connect(f"{user}.db")
+        memory = SqliteSaver(conn)
+        graph = workflow.compile(checkpointer=memory)
         yield graph
